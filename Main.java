@@ -18,6 +18,7 @@ public class Main {
     }
 
     private static void initialise() {
+        players = getPlayers();
         newGame();
         String playAgain = "YES";
         String inputtedString;
@@ -41,7 +42,6 @@ public class Main {
 
     private static void newGame() {
         int dim;
-        players = getPlayers();
         if (players == 1) {
             dim = 3;
             new Board(dim, getTurn(), players);

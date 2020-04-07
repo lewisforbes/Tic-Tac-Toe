@@ -2,7 +2,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
- * This 'AI' will never lose, it won't always win though.
+ * This 'AI' will never lose but won't always win.
  */
 
 public class AI {
