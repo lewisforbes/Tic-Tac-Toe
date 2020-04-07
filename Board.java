@@ -9,6 +9,8 @@ public class Board {
     public enum symbol {X, O}
     private symbol firstTurn;
 
+    private int players;
+
     private symbol[][] board; // symbol[column][row]
     private String alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
@@ -17,9 +19,14 @@ public class Board {
     private final String blankChar = " ";
     private final int paddingSize = 3;
 
-    public Board(int dim, symbol firstTurn) {
+
+    public Board(int dim, symbol firstTurn, int players) {
         this.firstTurn = firstTurn;
         this.board = new symbol[dim][dim];
+        this.players = players;
+        if ((players == 1) && (dim != 3)) {
+            throw new IllegalArgumentException("AI was selected but the board's dimension is not 3.");
+        }
         play();
     }
 
@@ -30,21 +37,40 @@ public class Board {
         while (true) {
             displayBoard();
             parsedMove = getMove(turn);
+
             board[parsedMove.get(0)][parsedMove.get(1)] = turn;
-            if (win(parsedMove, turn)) {
+            if ((WinChecker.isWin(parsedMove, turn, board)) || isDraw()) {
                 break;
             }
             turn = changeTurn(turn);
         }
 
         displayBoard();
-        System.out.println(turn + " won!");
-
-        if (turn == symbol.X) {
-            Main.xScore++;
+        if (isDraw()) {
+            System.out.println("It's a draw!");
         } else {
-            Main.oScore++;
+            System.out.println(turn + " won!");
+
+            if (turn == symbol.X) {
+                Main.xScore++;
+            } else {
+                Main.oScore++;
+            }
         }
+    }
+
+    private boolean isDraw() {
+        int dim = board.length;
+
+        for (int i = 0; i < dim; i++) {
+            for (int j = 0; j < dim; j++) {
+                if (board[i][j] == null) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 
     private void displayBoard() {
@@ -109,7 +135,14 @@ public class Board {
     }
 
     private ArrayList<Integer> getMove(symbol turn) {
+        if ((players!= 1) && (players != 2)) {
+           throw new IllegalArgumentException("players has been incorrectly set.");
+        }
 
+        if ((players == 1) && (turn == symbol.O)) {
+            System.out.println("The computer played: ");
+            return AI.getMove(board, turn);
+        }
         boolean validMove = false;
         String inputtedMove = "";
 
@@ -131,6 +164,7 @@ public class Board {
         }
 
         return parseMove(inputtedMove.toUpperCase());
+
     }
 
     private boolean isFormatValid(String inputtedMove) {
@@ -187,103 +221,5 @@ public class Board {
         }
 
         return new ArrayList<>(Arrays.asList(column, row));
-    }
-
-    private boolean win(ArrayList<Integer> move, symbol turn) {
-        int dim = board.length;
-        int col = move.get(0);
-        int row = move.get(1);
-
-        if (rowWin(col, row, turn, dim) || colWin(col, row, turn, dim) || diagWin(col, row, turn, dim)) {
-            return true;
-        }
-
-        return false;
-    }
-
-    private boolean rowWin(int col, int row, symbol turn, int dim) {
-        int found = 0;
-
-        for (int c = col; c <= dim - 1; c++) {
-            if (board[c][row] == turn) {
-                found++;
-            } else {
-                break;
-            }
-        }
-
-        for (int c = col; c >= 0; c--) {
-            if (board[c][row] == turn) {
-                found++;
-            } else {
-                break;
-            }
-        }
-
-        if ((found-1) == dim) {
-            return true;
-        }
-        return false;
-    }
-
-    private boolean colWin(int col, int row, symbol turn, int dim) {
-        int found = 0;
-
-        for (int r = row; r <= dim - 1; r++) {
-            if (board[col][r] == turn) {
-                found++;
-            } else {
-                break;
-            }
-        }
-
-        for (int r = row; r >= 0; r--) {
-            if (board[col][r] == turn) {
-                found++;
-            } else {
-                break;
-            }
-        }
-
-        if ((found-1) == dim) {
-            return true;
-        }
-        return false;
-    }
-
-    private boolean diagWin(int col, int row, symbol turn, int dim) {
-        int found = 0;
-
-        int currentCol = col;
-        int currentRow = row;
-
-        while ((currentCol<dim) && (currentRow<dim)) {
-            if (board[currentCol][currentRow] == turn) {
-                found++;
-            } else {
-                break;
-            }
-            currentCol++;
-            currentRow++;
-        }
-
-        currentCol = col;
-        currentRow = row;
-
-        while ((currentCol>=0) && (currentRow>=0)) {
-            if (board[currentCol][currentRow] == turn) {
-                found++;
-            } else {
-                break;
-            }
-            currentCol--;
-            currentRow--;
-        }
-
-
-        if ((found-1) == dim) {
-            return true;
-        }
-        return false;
     }
 }

@@ -8,6 +8,8 @@ public class Main {
     public static int xScore = 0;
     public static int oScore = 0;
 
+    private static int players = 0;
+
     private static Scanner input = new Scanner(System.in);
 
     public static void main(String[] args) {
@@ -16,8 +18,7 @@ public class Main {
     }
 
     private static void initialise() {
-        int dim = getDim();
-        new Board(dim, getTurn());
+        newGame();
         String playAgain = "YES";
         String inputtedString;
 
@@ -33,10 +34,28 @@ public class Main {
                 break;
             }
 
-            dim = getDim();
-            new Board(dim, getTurn());
+            newGame();
         }
 
+    }
+
+    private static void newGame() {
+        int dim;
+        players = getPlayers();
+        if (players == 1) {
+            dim = 3;
+            new Board(dim, getTurn(), players);
+            return;
+        }
+
+
+        if (players == 2) {
+            dim = getDim();
+            new Board(dim, getTurn(), players);
+            return;
+        }
+
+        throw new IllegalArgumentException("Players is not 1 or 2");
     }
 
     private static Board.symbol getTurn() {
@@ -60,6 +79,25 @@ public class Main {
             } catch (NumberFormatException nfe) {}
 
             System.out.println("Enter an number between " + minDim + " and " + maxDim + ".");
+        }
+
+        return Integer.parseInt(currentInput);
+    }
+
+    private static int getPlayers() {
+        String currentInput = "";
+
+        while (true) {
+            System.out.println("\nEnter '1' for single player or '2' for two player: ");
+            currentInput = input.nextLine();
+
+            try {
+                if ((Integer.parseInt(currentInput) == 1) || (Integer.parseInt(currentInput) == 2)) {
+                    break;
+                }
+            } catch (NumberFormatException nfe) {}
+
+            System.out.println("Enter 1 or 2.");
         }
 
         return Integer.parseInt(currentInput);
